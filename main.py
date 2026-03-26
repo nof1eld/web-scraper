@@ -1,6 +1,4 @@
 import csv
-import time
-
 from bs4 import BeautifulSoup
 import requests
 
@@ -10,16 +8,27 @@ def getHTML(url):
     # return the html from response
     return response.text
 
-html = getHTML('https://ai-house-website.vercel.app/sections/projects.html')
+html = getHTML('https://books.toscrape.com/')
 # parse html
 soup = BeautifulSoup(html, 'html.parser')
 
-scrapedInfo=[]
+scrapedPrices=[]
+scrapedNames=[]
+scrapedInstock=[]
+for stats in soup.find_all('p', attrs={'class': 'price_color'}):
+    scrapedPrices.append(stats.text)
+for stats in soup.find_all('h3'):
+    scrapedNames.append(stats.text)
+for stats in soup.find_all('p', attrs={'class': 'instock availability'}):
+    scrapedInstock.append(stats.text.strip())
+#write html in a txt file
+with open('htmltext.txt','w')as f:
+    f.write(requests.get("https://ai-house-website.vercel.app/sections/projects.html").text)
 
-for stats in soup.find_all('div', attrs={'class': 'stat'}):
-    scrapedInfo.append(stats.text)
 
-with open('scrapedInfo.csv', 'w') as f:
+with open('scrapedInfo.csv', 'w', newline='') as f:
     writer = csv.writer(f)
-    writer.writerow(scrapedInfo)
+    writer.writerow(scrapedNames)
+    writer.writerow(scrapedPrices)
+    writer.writerow(scrapedInstock)
     f.close()

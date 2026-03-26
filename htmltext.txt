@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI HOUSE Projects</title>
+    <link rel="icon" type="image/png" href="../assets/UHBC-logo-250.png" />
+    <link rel="apple-touch-icon" href="../assets/UHBC-logo-250.png" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="../javascript/auth.js" defer></script>
+    <script src="../javascript/projects.js" defer></script>
+    <script src="../javascript/navbar.js" defer></script>
+    <link rel="stylesheet" href="../css/main.css" />
+    <link rel="stylesheet" href="../css/index.css" />
+    <link rel="stylesheet" href="../css/navbar.css" />
+    <link rel="stylesheet" href="../css/home-background.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="../css/projects.css" />
+  </head>
+  <body class="unified-home-bg">
+    <header>
+      <nav class="navbar">
+        <div class="logo">
+          <a href="../index.html">
+            <img
+              src="../assets/AI-House-logo.png"
+              width="69"
+              alt="The AI House Logo"
+            />
+          </a>
+        </div>
+        <ul class="nav-links">
+          <li><a href="./events.html">Events</a></li>
+          <li><a href="./projects.html">Projects</a></li>
+          <li><a href="../index.html#about">About</a></li>
+        </ul>
+        <div class="nav-actions">
+          <a id="login-nav-btn" href="members.html" class="btn btn-primary"
+            >Login</a
+          >
+          <button class="theme-toggle-btn" aria-label="Toggle Theme">
+            <i class="fa-solid fa-moon"></i>
+          </button>
+        </div>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <h1>
+        Welcome to AI HOUSE <span class="projects-gradient">PROJECTS</span>
+      </h1>
+      <p>Building smart and modern solutions</p>
+    </section>
+
+    <section class="project-stats">
+      <div class="stat">
+        <h3 id="stat-projects">0</h3>
+        <p>Projects</p>
+      </div>
+      <div class="stat">
+        <h3 id="stat-types">0</h3>
+        <p>Tracks</p>
+      </div>
+      <div class="stat">
+        <h3 id="stat-students">0</h3>
+        <p>Students</p>
+      </div>
+    </section>
+
+    <div class="project-controls">
+      <button id="add-project-btn">
+        <i class="fas fa-plus-circle"></i> Add Project
+      </button>
+    </div>
+
+    <section class="projects" id="projects-container"></section>
+
+    <!-- ADD MODAL -->
+    <div class="modal" id="addProjectModal">
+      <div class="modal-content">
+        <h2 class="modal-title-green">Add New Project</h2>
+        <p class="modal-subtitle">AI House Projects Directory</p>
+        <div class="modal-form-group">
+          <label>Project Name</label>
+          <input type="text" id="input-name" placeholder="ex: Smart Home AI" />
+        </div>
+        <div class="modal-form-group">
+          <label>Project Type</label>
+          <select id="input-type">
+            <option value="Machine Learning">Machine Learning</option>
+            <option value="Deep Learning">Deep Learning</option>
+            <option value="Computer Vision">Computer Vision</option>
+            <option value="NLP">NLP</option>
+            <option value="Robotics">Robotics</option>
+            <option value="Data Science">Data Science</option>
+            <option value="AI Ethics">AI Ethics</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="modal-form-group">
+          <label>Project Description</label>
+          <textarea
+            id="input-comment"
+            rows="3"
+            placeholder="Brief description..."
+          ></textarea>
+        </div>
+        <div class="modal-actions">
+          <button id="add-btn">Confirm</button>
+          <button class="cancel-btn" id="cancel-add-btn">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- EDIT MODAL -->
+    <div class="modal" id="editProjectModal">
+      <div class="modal-content">
+        <h2 class="modal-title-green">Edit Project</h2>
+        <p class="modal-subtitle">AI House Projects Directory</p>
+        <div class="modal-form-group">
+          <label>Project Name</label>
+          <input type="text" id="edit-name" placeholder="ex: Smart Home AI" />
+        </div>
+        <div class="modal-form-group">
+          <label>Project Type</label>
+          <select id="edit-type">
+            <option value="Machine Learning">Machine Learning</option>
+            <option value="Deep Learning">Deep Learning</option>
+            <option value="Computer Vision">Computer Vision</option>
+            <option value="NLP">NLP</option>
+            <option value="Robotics">Robotics</option>
+            <option value="Data Science">Data Science</option>
+            <option value="AI Ethics">AI Ethics</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="modal-form-group">
+          <label>Project Description</label>
+          <textarea
+            id="edit-comment"
+            rows="3"
+            placeholder="Brief description..."
+          ></textarea>
+        </div>
+        <div class="modal-actions">
+          <button id="save-edit-btn">Save Changes</button>
+          <button class="cancel-btn" id="cancel-edit-btn">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
