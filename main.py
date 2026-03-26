@@ -7,6 +7,8 @@ def getHTML(url):
     # return the html from response
     return response.text
 
-# parse and print html
-soup = BeautifulSoup(htmlCode, 'html.parser')
+html = getHTML('https://ai-house-website.vercel.app/')
+# parse html
+soup = BeautifulSoup(html, 'html.parser')
+
 print(soup.prettify())
