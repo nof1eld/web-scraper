@@ -1,34 +1,49 @@
 import csv
 from bs4 import BeautifulSoup
 import requests
+import json
+from os import getenv
+import google.genai as genai
+from google.genai import types
 
-def getHTML(url):
+def getParsedHTML(url):
     # Get the response object that contains html
     response = requests.get(url)
-    # return the html from response
-    return response.text
+    # return parsed html from response
+    return BeautifulSoup(response.text, 'html.parser')
 
-html = getHTML('https://books.toscrape.com/')
-# parse html
-soup = BeautifulSoup(html, 'html.parser')
+def getSchemaJSON(html):
+        system_instruction = (
+            "Extract a scraping schema from the HTML.\n"
+            "Return ONLY valid JSON in this format:\n"
+            '{"row_selector":"...","fields":{"name":"selector"}}\n'
+            "Don't use formatters"
+            "Rules:\n"
+            "- Identify the repeating item (row_selector)\n"
+            "- Fields = visible data inside each row\n"
+            "- Use short snake_case names\n"
+            "- Selectors must be CSS and relative to the row\n"
+            "- Prefer classes; avoid deep paths\n"
+            "- Do not invent data\n"
+            "- Return ONLY raw JSON.\n"
+            "- Do NOT use markdown.\n"
+            "- Do NOT wrap in ```json.\n"
+        )
+        try:
+            client = genai.Client(api_key="")
+            response = client.models.generate_content(
+                    model="gemini-2.5-flash",
+                    config=types.GenerateContentConfig(
+                        system_instruction=system_instruction),
+                    contents=str(html)
+                ).text
+            return json.loads(response)
+        except Exception as e:
+            print("An error occurred:", str(e))
 
-scrapedPrices=[]
-scrapedNames=[]
-scrapedInstock=[]
-for stats in soup.find_all('p', attrs={'class': 'price_color'}):
-    scrapedPrices.append(stats.text)
-for stats in soup.find_all('h3'):
-    scrapedNames.append(stats.text)
-for stats in soup.find_all('p', attrs={'class': 'instock availability'}):
-    scrapedInstock.append(stats.text.strip())
-#write html in a txt file
-with open('htmltext.txt','w')as f:
-    f.write(requests.get("https://ai-house-website.vercel.app/sections/projects.html").text)
+parsedHTML = getParsedHTML('https://books.toscrape.com/')
+schemaJSON = getSchemaJSON(parsedHTML)
+
+print(schemaJSON)
 
 
-with open('scrapedInfo.csv', 'w', newline='') as f:
-    writer = csv.writer(f)
-    writer.writerow(scrapedNames)
-    writer.writerow(scrapedPrices)
-    writer.writerow(scrapedInstock)
-    f.close()
