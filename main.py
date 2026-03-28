@@ -1,50 +1,60 @@
+from playwright.sync_api import sync_playwright
 import csv
 from bs4 import BeautifulSoup
-import requests
 import json
-from dotenv import load_dotenv
-from os import getenv
 import google.genai as genai
 from google.genai import types
 
-load_dotenv()
 def getParsedHTML(url):
-    # Get the response object that contains html
-    response = requests.get(url)
+    # open new chromium window and fetch the html from url
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page()
+        page.goto(url, wait_until="networkidle")
+        html = page.content()
+        browser.close()
     # return parsed html from response
-    return BeautifulSoup(response.text, 'html.parser')
+    return BeautifulSoup(html, 'html.parser')
 
 def getSchemaJSON(html):
-        systemInstruction = (
-            "Extract a scraping schema from the HTML.\n"
-            "Return ONLY valid JSON in this format:\n"
-            '{"row_selector":"...","fields":{"name":"selector"}}\n'
-            "Don't use formatters"
-            "Rules:\n"
-            "- Identify the repeating item (row_selector)\n"
-            "- Fields = visible data inside each row\n"
-            "- Use short snake_case names\n"
-            "- Selectors must be CSS and relative to the row\n"
-            "- Prefer classes; avoid deep paths\n"
-            "- Do not invent data\n"
-            "- Return ONLY raw JSON.\n"
-            "- Do NOT use markdown.\n"
-            "- Do NOT wrap in ```json.\n"
-            #added these prompts to avoid returning pseudo-elements that BS don't support
-            "- Do NOT use pseudo-elements like ::text, ::attr, ::before, ::after\n"
-            "- Selectors must be valid CSS for BeautifulSoup/soupsieve\n"
-        )
-        try:
-            client = genai.Client(api_key=getenv("API_KEY"))
-            response = client.models.generate_content(
-                    model="gemini-2.5-flash",
-                    config=types.GenerateContentConfig(
-                        system_instruction=systemInstruction),
-                    contents=str(html)
-                ).text
-            return json.loads(response)
-        except Exception as e:
-            print("An error occurred:", str(e))
+    systemInstruction = (
+        "Extract a scraping schema from the HTML.\n"
+        "Return ONLY valid JSON in this exact format:\n"
+        '{"row_selector":"CSS selector","fields":{"field_name":"relative CSS selector"}}\n'
+        "Your entire response must begin with { and end with }.\n"
+        "Rules:\n"
+        "- Choose the repeating container used for the main list items, not a wrapper around the whole page and not a single highlighted card.\n"
+        "- The row_selector must match multiple similar items whenever the page is a listing page.\n"
+        "- Include only visible text fields inside each row.\n"
+        "- Use short snake_case field names.\n"
+        "- Each field selector must be valid CSS and relative to the row.\n"
+        "- Prefer stable semantic selectors.\n"
+        "- Avoid brittle generated classes that look hashed or auto-generated unless no better selector exists.\n"
+        "- Avoid deep descendant chains when a shorter selector works.\n"
+        "- Each field selector should target the smallest element that contains only that field's text.\n"
+        "- Do not use one selector for multiple fields if that selector returns concatenated text from several data points.\n"
+        "- Avoid selectors that capture long rich-text descriptions, HTML fragments, hidden content, scripts, or JSON blobs.\n"
+        "- If a field is not clearly available as its own text element, omit it instead of guessing.\n"
+        "- Do not invent fields or values.\n"
+        "- Do NOT use pseudo-elements like ::text, ::attr, ::before, ::after or any other pseudo-element.\n"
+        "- Selectors must be valid CSS for BeautifulSoup/soupsieve.\n"
+        "- Return ONLY raw JSON.\n"
+        "- Do NOT include markdown, comments, or explanations.\n"
+        "- Do NOT wrap the JSON in triple backticks.\n"
+        "- Do NOT start the response with ```json.\n"
+        "- Output exactly one JSON object and nothing else.\n"
+    )
+
+    client = genai.Client(api_key="")
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        config=types.GenerateContentConfig(
+            system_instruction=systemInstruction
+        ),
+        contents=str(html)
+    ).text
+    print(response)
+    return json.loads(response)
 
 
 #new function to scrapedata from parsedhtml
@@ -58,16 +68,11 @@ def scrapeData(html, schema):
             item[f] = element.get_text(strip=True)if element else None
         scrapedData.append(item)
     return scrapedData
-parsedHTML = getParsedHTML('https://quotes.toscrape.com/')
+parsedHTML = getParsedHTML('https://old.reddit.com')
 schemaJSON = getSchemaJSON(parsedHTML)
 scrapedData = scrapeData(parsedHTML, schemaJSON)
+
 with open("scrapedInfo.csv", "w", newline="", encoding="utf-8") as f:
     writer = csv.DictWriter(f, fieldnames=scrapedData[0].keys())
     writer.writeheader()
     writer.writerows(scrapedData)
-print(scrapedData)
-
-
-
-
-
