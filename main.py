@@ -15,11 +15,21 @@ app = Flask(__name__)
 CORS(app, origins="*")
 api_key = os.environ["GEMINI_API_KEY"]
 
-playwright_instance = sync_playwright().start()
-browser = playwright_instance.chromium.launch()
+playwright_instance = None
+browser = None
+
+# open new chromium browser (if there isn't)
+def get_browser():
+    global playwright_instance, browser
+    if browser is None:
+        playwright_instance = sync_playwright().start()
+        browser = playwright_instance.chromium.launch()
+    return browser
+
 
 def getParsedHTML(url):
-    # open new chromium window and fetch the html from url
+    # open browser window 
+    browser = get_browser()
     context = browser.new_context()
     page = context.new_page()
     # prevent unnecessary resources from being fetched
@@ -29,6 +39,7 @@ def getParsedHTML(url):
         if route.request.resource_type in ["image", "media", "font"]
         else route.continue_()
     )
+    # open url and fetch the html from it
     page.goto(url, wait_until="networkidle")
     html = page.content()
     context.close()
