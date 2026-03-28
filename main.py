@@ -7,9 +7,12 @@ import io
 import google.genai as genai
 from google.genai import types
 from flask import Flask, request, Response
+from flask_cors import CORS
+
 
 
 app = Flask("__name__")
+CORS(app, origins="*")
 api_key = os.environ["GEMINI_API_KEY"]
 
 def getParsedHTML(url):
