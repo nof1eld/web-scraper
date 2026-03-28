@@ -1,9 +1,16 @@
 from playwright.sync_api import sync_playwright
+import os
 import csv
 from bs4 import BeautifulSoup
 import json
+import io
 import google.genai as genai
 from google.genai import types
+from flask import Flask, request, Response
+
+
+app = Flask("__name__")
+api_key = os.environ["GEMINI_API_KEY"]
 
 def getParsedHTML(url):
     # open new chromium window and fetch the html from url
@@ -45,7 +52,7 @@ def getSchemaJSON(html):
         "- Output exactly one JSON object and nothing else.\n"
     )
 
-    client = genai.Client(api_key="")
+    client = genai.Client(api_key=api_key)
     response = client.models.generate_content(
         model="gemini-2.5-flash",
         config=types.GenerateContentConfig(
@@ -53,7 +60,6 @@ def getSchemaJSON(html):
         ),
         contents=str(html)
     ).text
-    print(response)
     return json.loads(response)
 
 
@@ -68,11 +74,23 @@ def scrapeData(html, schema):
             item[f] = element.get_text(strip=True)if element else None
         scrapedData.append(item)
     return scrapedData
-parsedHTML = getParsedHTML('https://old.reddit.com')
-schemaJSON = getSchemaJSON(parsedHTML)
-scrapedData = scrapeData(parsedHTML, schemaJSON)
 
-with open("scrapedInfo.csv", "w", newline="", encoding="utf-8") as f:
-    writer = csv.DictWriter(f, fieldnames=scrapedData[0].keys())
+@app.route("/scrape")
+def scrape():
+    url = request.args.get("url")
+    parsedHTML = getParsedHTML(url)
+    schemaJSON = getSchemaJSON(parsedHTML)
+    scrapedData = scrapeData(parsedHTML, schemaJSON)
+
+    csvFile = io.StringIO()
+    writer = csv.DictWriter(csvFile, fieldnames=scrapedData[0].keys())
     writer.writeheader()
     writer.writerows(scrapedData)
+    return Response(
+        csvFile.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": f"attachment; filename=data.csv"}
+    )
+
+if __name__ == "__main__":
+    app.run(debug=True)

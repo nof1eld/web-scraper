@@ -1,0 +1,5 @@
+flask
+gunicorn
+playwright
+beautifulsoup4
+google-genai
