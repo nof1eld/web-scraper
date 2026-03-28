@@ -11,20 +11,33 @@ from flask_cors import CORS
 
 
 
-app = Flask("__name__")
+app = Flask(__name__)
 CORS(app, origins="*")
 api_key = os.environ["GEMINI_API_KEY"]
 
+playwright_instance = sync_playwright().start()
+browser = playwright_instance.chromium.launch()
+
 def getParsedHTML(url):
     # open new chromium window and fetch the html from url
-    with sync_playwright() as p:
-        browser = p.chromium.launch()
-        page = browser.new_page()
-        page.goto(url, wait_until="networkidle")
-        html = page.content()
-        browser.close()
-    # return parsed html from response
-    return BeautifulSoup(html, 'html.parser')
+    context = browser.new_context()
+    page = context.new_page()
+    # prevent unnecessary resources from being fetched
+    page.route(
+        "**/*",
+        lambda route: route.abort()
+        if route.request.resource_type in ["image", "media", "font"]
+        else route.continue_()
+    )
+    page.goto(url, wait_until="networkidle")
+    html = page.content()
+    context.close()
+    # return parsed & cleaned html from response
+    parsedHTML = BeautifulSoup(html, 'html.parser')
+    for tag in parsedHTML(["script", "style", "noscript", "svg"]):
+        tag.decompose()
+    body = parsedHTML.body 
+    return body if body else parsedHTML
 
 def getSchemaJSON(html):
     systemInstruction = (
