@@ -123,6 +123,9 @@ def scrape():
     print(schemaJSON)
     print("PARSED_SCHEMA_JSON_END")
     scrapedData = scrapeData(parsedHTML, schemaJSON)
+    print("SCRAPED_DATA_START")
+    print(scrapedData)
+    print("SCRAPED_DATA_END")
 
     csvFile = io.StringIO()
     writer = csv.DictWriter(csvFile, fieldnames=scrapedData[0].keys())
