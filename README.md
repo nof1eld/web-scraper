@@ -2,6 +2,8 @@
 
 This project is a generic scraping API that turns a web page into structured CSV data.
 
+> Note: the API layer is simple. The real focus of this project is the scraping functionality and the extraction workflow, not the API design itself.
+
 Instead of hardcoding selectors for one specific website, it tries to understand the page structure dynamically. The idea is simple:
 
 - a user provides a URL
@@ -48,13 +50,14 @@ The API is intentionally simple:
 - a URL goes in
 - a CSV file comes out
 
-The current interface is a GET endpoint that accepts a target URL and returns the extracted result as a downloadable CSV response.
+The current interface is just a simple GET endpoint that accepts a target URL and returns the extracted result as a downloadable CSV response.
 
 ## Demo
 
 Live frontend demo:
 
 - https://web-scraper-frontend-eta.vercel.app/
+- Frontend repository: https://github.com/mendas-cpu/web-scraper-frontend
 
 ## Configuration
 
