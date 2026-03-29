@@ -23,7 +23,7 @@ def get_browser():
     global playwright_instance, browser
     if browser is None:
         playwright_instance = sync_playwright().start()
-        browser = playwright_instance.chromium.launch(headless=False)
+        browser = playwright_instance.chromium.launch()
     return browser
 
 
@@ -41,7 +41,7 @@ def getParsedHTML(url):
     )
     # open url and fetch the html from it
     page.goto(url, wait_until="networkidle")
-    page.wait_for_timeout(10000)
+    page.wait_for_timeout(8000)
     html = page.content()
     context.close()
     # return parsed & cleaned html from response
