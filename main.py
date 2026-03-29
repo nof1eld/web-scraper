@@ -23,7 +23,7 @@ def get_browser():
     global playwright_instance, browser
     if browser is None:
         playwright_instance = sync_playwright().start()
-        browser = playwright_instance.chromium.launch()
+        browser = playwright_instance.chromium.launch(headless=False)
     return browser
 
 
@@ -41,6 +41,7 @@ def getParsedHTML(url):
     )
     # open url and fetch the html from it
     page.goto(url, wait_until="networkidle")
+    page.wait_for_timeout(10000)
     html = page.content()
     context.close()
     # return parsed & cleaned html from response
@@ -61,13 +62,18 @@ def getSchemaJSON(html):
         "- The row_selector must match multiple similar items whenever the page is a listing page.\n"
         "- Include only visible text fields inside each row.\n"
         "- Use short snake_case field names.\n"
-        "- Each field selector must be valid CSS and relative to the row.\n"
+        "- Each selector must be valid CSS, and field selectors must be relative to the row.\n"
+        "- If an element is identified by class, prefix the class with a dot.\n"
+        "- Do not write class names as tag names. For example, if an element has class 'v-card', use '.v-card', not 'v-card'.\n"
+        "- If multiple classes are on the same element, combine them like '.class1.class2'.\n"
+        "- Only use a tag selector like 'div' or 'article' when that is the actual HTML tag.\n"
         "- Prefer stable semantic selectors.\n"
+        "- Prefer selectors that are likely to match real elements in the provided HTML.\n"
         "- Avoid brittle generated classes that look hashed or auto-generated unless no better selector exists.\n"
         "- Avoid deep descendant chains when a shorter selector works.\n"
         "- Each field selector should target the smallest element that contains only that field's text.\n"
         "- Do not use one selector for multiple fields if that selector returns concatenated text from several data points.\n"
-        "- Avoid selectors that capture long rich-text descriptions, HTML fragments, hidden content, scripts, or JSON blobs.\n"
+        "- Avoid selectors that capture long rich-text descriptions, hidden content, scripts, styles, or JSON blobs.\n"
         "- If a field is not clearly available as its own text element, omit it instead of guessing.\n"
         "- Do not invent fields or values.\n"
         "- Do NOT use pseudo-elements like ::text, ::attr, ::before, ::after or any other pseudo-element.\n"
@@ -87,6 +93,9 @@ def getSchemaJSON(html):
         ),
         contents=str(html)
     ).text
+    print("SCHEMA_JSON_RESPONSE_START")
+    print(response)
+    print("SCHEMA_JSON_RESPONSE_END")
     return json.loads(response)
 
 
@@ -106,7 +115,13 @@ def scrapeData(html, schema):
 def scrape():
     url = request.args.get("url")
     parsedHTML = getParsedHTML(url)
+    print("PARSED_HTML_START")
+    print(parsedHTML)
+    print("PARSED_HTML_END")
     schemaJSON = getSchemaJSON(parsedHTML)
+    print("PARSED_SCHEMA_JSON_START")
+    print(schemaJSON)
+    print("PARSED_SCHEMA_JSON_END")
     scrapedData = scrapeData(parsedHTML, schemaJSON)
 
     csvFile = io.StringIO()
