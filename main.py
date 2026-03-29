@@ -41,7 +41,7 @@ def getParsedHTML(url):
     )
     # open url and fetch the html from it
     page.goto(url, wait_until="networkidle")
-    page.wait_for_timeout(8000)
+    page.wait_for_timeout(12000)
     html = page.content()
     context.close()
     # return parsed & cleaned html from response
