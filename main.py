@@ -93,9 +93,6 @@ def getSchemaJSON(html):
         ),
         contents=str(html)
     ).text
-    print("SCHEMA_JSON_RESPONSE_START")
-    print(response)
-    print("SCHEMA_JSON_RESPONSE_END")
     return json.loads(response)
 
 
@@ -115,17 +112,8 @@ def scrapeData(html, schema):
 def scrape():
     url = request.args.get("url")
     parsedHTML = getParsedHTML(url)
-    print("PARSED_HTML_START")
-    print(parsedHTML)
-    print("PARSED_HTML_END")
     schemaJSON = getSchemaJSON(parsedHTML)
-    print("PARSED_SCHEMA_JSON_START")
-    print(schemaJSON)
-    print("PARSED_SCHEMA_JSON_END")
     scrapedData = scrapeData(parsedHTML, schemaJSON)
-    print("SCRAPED_DATA_START")
-    print(scrapedData)
-    print("SCRAPED_DATA_END")
 
     csvFile = io.StringIO()
     writer = csv.DictWriter(csvFile, fieldnames=scrapedData[0].keys())
