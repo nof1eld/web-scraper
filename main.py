@@ -96,7 +96,7 @@ def getSchemaJSON(html):
     return json.loads(response)
 
 
-#new function to scrapedata from parsedhtml
+# to scrapedata from parsedhtml
 def scrapeData(html, schema):
     rows = html.select(schema["row_selector"])
     scrapedData = []
