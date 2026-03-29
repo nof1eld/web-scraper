@@ -50,6 +50,12 @@ The API is intentionally simple:
 
 The current interface is a GET endpoint that accepts a target URL and returns the extracted result as a downloadable CSV response.
 
+## Demo
+
+Live frontend demo:
+
+- https://web-scraper-frontend-eta.vercel.app/
+
 ## Configuration
 
 The application uses a Gemini API key through an environment variable:
