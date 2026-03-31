@@ -3,4 +3,4 @@ flask-cors
 gunicorn
 playwright
 beautifulsoup4
-google-genai
+openai

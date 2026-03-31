@@ -61,9 +61,9 @@ Live frontend demo:
 
 ## Configuration
 
-The application uses a Gemini API key through an environment variable:
+The application uses NVIDIA's hosted models API and an environment variable:
 
-- `GEMINI_API_KEY`
+- `NVIDIA_API_KEY`
 
 ## Running and Deploying
 

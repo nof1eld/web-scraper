@@ -4,16 +4,20 @@ import csv
 from bs4 import BeautifulSoup
 import json
 import io
-import google.genai as genai
-from google.genai import types
+from openai import OpenAI
 from flask import Flask, request, Response
 from flask_cors import CORS
 
 
-
+#init flask app
 app = Flask(__name__)
 CORS(app, origins="*")
-api_key = os.environ["GEMINI_API_KEY"]
+
+api_key = os.environ["NVIDIA_API_KEY"]
+ai_client = OpenAI(
+    base_url="https://integrate.api.nvidia.com/v1",
+    api_key=api_key,
+)
 
 playwright_instance = None
 browser = None
@@ -85,14 +89,17 @@ def getSchemaJSON(html):
         "- Output exactly one JSON object and nothing else.\n"
     )
 
-    client = genai.Client(api_key=api_key)
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        config=types.GenerateContentConfig(
-            system_instruction=systemInstruction
-        ),
-        contents=str(html)
-    ).text
+    completion = ai_client.chat.completions.create(
+        model="mistralai/mixtral-8x22b-instruct-v0.1",
+        messages=[
+            {"role": "system", "content": systemInstruction},
+            {"role": "user", "content": str(html)},
+        ],
+        temperature=0.5,
+        top_p=1,
+        max_tokens=1024,
+    )
+    response = completion.choices[0].message.content
     return json.loads(response)
 
 
