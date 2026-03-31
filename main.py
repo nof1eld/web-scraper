@@ -90,7 +90,7 @@ def getSchemaJSON(html):
     )
 
     completion = ai_client.chat.completions.create(
-        model="mistralai/mixtral-8x22b-instruct-v0.1",
+        model="qwen/qwen2.5-7b-instruct",
         messages=[
             {"role": "system", "content": systemInstruction},
             {"role": "user", "content": str(html)},
